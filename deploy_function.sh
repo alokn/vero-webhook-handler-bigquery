@@ -21,12 +21,6 @@ MEMORY="128Mi"
 CPU="0.1"
 MAX_INSTANCES="100"
 
-# Create a temporary directory for deployment files
-TEMP_DIR=$(mktemp -d)
-
-# Copy only main.py and requirements.txt to the temporary directory
-cp main.py requirements.txt "$TEMP_DIR/"
-
 # Deploy the function (Gen 2)
 echo "Deploying Cloud Function..."
 gcloud functions deploy $FUNCTION_NAME \
@@ -36,7 +30,7 @@ gcloud functions deploy $FUNCTION_NAME \
     --trigger-http \
     --allow-unauthenticated \
     --entry-point=$FUNCTION_NAME \
-    --source="$TEMP_DIR" \
+    --source=api \
     --set-env-vars=PROJECT_ID=$PROJECT_ID,DATASET=$DATASET,TABLE=$TABLE \
     --gen2 \
     --memory=$MEMORY \
@@ -44,7 +38,5 @@ gcloud functions deploy $FUNCTION_NAME \
     --max-instances=$MAX_INSTANCES \
     --service-account=$SERVICE_ACCOUNT_EMAIL || handle_error "Failed to deploy Cloud Function"
 
-# Clean up the temporary directory
-rm -rf "$TEMP_DIR"
 
 echo "Cloud Function (Gen 2) deployed successfully."
